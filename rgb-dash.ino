@@ -7,6 +7,8 @@
 
 #include "configuration.h"
 
+const int EPOCH_1_1_2019 = 1546300800;
+
 Adafruit_NeoMatrix matrix =
   Adafruit_NeoMatrix(
     TILE_WIDTH, 8, TILE_HORIZ_COUNT, 1, PIN,
@@ -23,23 +25,17 @@ void set_brightness(uint8_t br) {
 }
 
 time_t get_time_from_internet() {
-  configTime(LOCAL_TIMEZONE_OFFSET_SECONDS,
-             LOCAL_DST_OFFSET_SECONDS,
-             "pool.ntp.org");
   set_status("time...");
 
-  do {
-    Serial.print(".");
-    delay(500);
-  } while (!time(nullptr));
-  Serial.println();
+  configTime(LOCAL_TIMEZONE_OFFSET_SECONDS,
+            LOCAL_DST_OFFSET_SECONDS,
+            "pool.ntp.org");
 
   time_t now = time(nullptr);
-  struct tm ts = *localtime(&now);
-  Serial.print(" ");
-  Serial.print(now, DEC);
-  Serial.print(" -> ");
-  Serial.println(ctime(&now));
+  while (now < EPOCH_1_1_2019) {
+    delay(500);
+    now = time(nullptr);
+  };
   return now;
 }
 
